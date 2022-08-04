@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 import pandas as pd
 import time
 from numpy import random
@@ -9,6 +10,7 @@ def flatten(t):
     "Flattens a list"
     return [item for sublist in t for item in sublist]
 
+
 def chrome(path, headless=True):
     "Instantiates a Chrome driver instance"
     opt = webdriver.ChromeOptions()
@@ -16,6 +18,8 @@ def chrome(path, headless=True):
         opt.add_argument("--headless")
     opt.add_argument('--blink-settings=imagesEnabled=false')
     opt.add_argument('--no-sandbox')
+    opt.add_argument("--incognito")
+    opt.add_argument('--disable-dev-shm-usage')        
     browser = webdriver.Chrome(path, options=opt)
     browser.implicitly_wait(10)
     browser.set_page_load_timeout(20)
@@ -39,30 +43,29 @@ def scrapper(url, driver_path='C:/Users/59898/Documents/chromedriver.exe', headl
             print('Get method failed, check URL. ', e)
 
         no_avisos_xpath = '//*[@id="grillaavisos"]'
-        grilla = driver.find_elements_by_xpath(no_avisos_xpath)
+        grilla = driver.find_element(By.XPATH, no_avisos_xpath)
         texto_no_aviso = 'No se han encontrado avisos para la búsqueda seleccionada.'
 
-        if grilla[0].text == texto_no_aviso:
-            driver.quit()
+        if grilla.text == texto_no_aviso:
             return
         else:
-            pagina = [e.text.splitlines() for e in driver.find_elements_by_css_selector('.contenedor-info')]
+            pagina = [e.text.splitlines() for e in driver.find_elements(By.CSS_SELECTOR, '.contenedor-info')]
             data.append(pagina)
-            html = [e.get_attribute("innerHTML") for e in driver.find_elements_by_css_selector('.contenedor-info .mas-info')]
+            html = [e.get_attribute("innerHTML") for e in driver.find_elements(By.CSS_SELECTOR,'.contenedor-info .mas-info')]
 
             for i in html:
                 soup = BeautifulSoup(i, "html.parser")
                 metraje.append(soup.span.text)
                 url_publicacion.append(soup.find('a')['href'])
 
-            flat_list = flatten(data)
-            result = pd.DataFrame(flat_list, columns=['desc', 'valor'])
-            result['metraje'] = metraje
-            result['metraje'] = result['metraje'].replace({' m2': ''}, regex=True)
-            result['url'] = url_publicacion
-            driver.quit()
+    flat_list = flatten(data)
+    result = pd.DataFrame(flat_list, columns=['desc', 'valor'])
+    result['metraje'] = metraje
+    result['metraje'] = result['metraje'].replace({' m2': ''}, regex=True)
+    result['url'] = url_publicacion
+    driver.quit()
 
-            return result
+    return result
 
        
 def scrap_latlng(url, driver_path='C:/Users/59898/Documents/chromedriver.exe', headless=True):
@@ -74,22 +77,28 @@ def scrap_latlng(url, driver_path='C:/Users/59898/Documents/chromedriver.exe', h
     for i in url:
         try:   
             driver.get(i)
-            elem = driver.find_elements_by_css_selector('#ubicacion')
-        except:
+            elem = driver.find_elements(By.CSS_SELECTOR,'#ubicacion')
+        except Exception as e:
             try:
-                time.sleep(3)
+                time.sleep(random.uniform(2.0, 5.0))
                 driver.get(i)
-                elem = driver.find_elements_by_css_selector('#ubicacion')
-            except:
+                elem = driver.find_elements(By.CSS_SELECTOR,'#ubicacion')
+            except Exception as e:
+                print(f'Failed at URL: {i}.', e)
                 elem = []
 
         if elem != []:
-            element = driver.find_element_by_xpath("/html/body/form/main/div/div[1]/ul/li[4]/a/i")
-            element.click()
-            ubic_html = [e.get_attribute("innerHTML") for e in driver.find_elements_by_css_selector("#ubicacion")]
-            soup = BeautifulSoup(ubic_html[0], "html.parser")
-            src = soup.find('iframe')['src']
-            latlng = src.split('q=', 1)[1].split('&zoom=', 1)[0]
+            try:
+                element = driver.find_element('xpath', "/html/body/form/main/div/div[1]/ul/li[4]/a/i")
+                element.click()
+                ubic_html = [e.get_attribute("innerHTML") for e in driver.find_elements(By.CSS_SELECTOR,"#ubicacion")]
+                soup = BeautifulSoup(ubic_html[0], "html.parser")
+                src = soup.find('iframe')['src']
+                latlng = src.split('q=', 1)[1].split('&zoom=', 1)[0]
+            except Exception as e:
+                print(e)
+                latlng == '/,/'
+    
             if latlng == '/,/':
                 coordenadas.append('Nan,Nan')
             else:

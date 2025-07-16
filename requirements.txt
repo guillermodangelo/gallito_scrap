@@ -1,0 +1,6 @@
+pandas
+numpy
+geopandas
+tqdm
+selenium
+bs4

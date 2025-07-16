@@ -4,6 +4,8 @@ Scrapeo de datos de [El Gallito](https://www.gallito.com.uy/inmuebles) usando Py
 
 Acceda al [web-map](https://guillermodangelo.com/webmaps/hexgrid_mvo/)
 
+![alt text](screen.png "Ejemplo")
+
 ## Introducción
 
 Requiere de instalar [ChromeDriver](https://chromedriver.chromium.org/downloads) o modificar el script para usar otro navegador.

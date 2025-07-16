@@ -20,12 +20,14 @@ Correr el scraper con `python run_scraper.py`, una vez activado el virtual envir
 Las funciones de scraping se encuentran en el archivo `scraper_gallito.py`. Para correr el scraper, ejecutar el archivo `run_scraper.py`.
 
 Setear la variable `DEBUG` a `True` para correr el scraper en modo debug. Setear la cantidad de hilos a usar en `THREADS`.
+Este script devuelve un listado de URLs de ventas, que luego se toman como entrada para el script `scrap_latlng.py`.
 
 2. Scraping de coordenadas
 
-Para scraping de coordenadas, ejecutar el archivo `scrap_latlng.py`.
+Para scraping de coordenadas, ejecutar el archivo `scrap_latlng.py`. El script va recorriendo cada URL de ventas y extrayendo las coordenadas de la página, si están disponibles.
 
 Setear la variable `DEBUG` a `True` para correr el scraper en modo debug. Setear la cantidad de hilos a usar en `THREADS`.
+Cambiar el archivo `INPUT_FILE` para usar un archivo de entrada válido.
 
 3. Postprocesamiento de datos
 
